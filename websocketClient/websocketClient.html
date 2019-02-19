@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div id="websocketClient">
+    <p id="websocketClient-title">websocketClient</p>
+    <div id="websocketClient-header">
+        ipaddr:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input class="websocketClient-input" id="websocketClient-ipaddr" value="192.168.121.219">
+        <br/>
+        port:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input class="websocketClient-input" id="websocketClient-port" value="21135">
+        <br/>
+        nameSpace:&nbsp;<input class="websocketClient-input" id="websocketClient-nameSpace" value="/ws/servermanage">
+        <br/>
+        eventName:&nbsp;<input class="websocketClient-input" id="websocketClient-eventName" value="init_first_node">
+        <br/>
+        <button class="websocketClient-button" id="websocketClient-sendRequest" onclick="sendRequest()">sendRequest</button>
+    </div>
+    <div id="websocketClient-footer">
+        <textarea id="websocketClient-inputWindow" placeholder="输入数据"></textarea>>
+        <textarea id="websocketClient-outputWindow" placeholder="输出数据"></textarea>
+    </div>
+</div>
+<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.6/socket.io.min.js"></script>
+<script type="text/javascript" charset="utf-8">
+    function sendRequest() {
+        try {
+            var ipaddr = document.getElementById("websocketClient-ipaddr").value.trim();
+            var port = document.getElementById("websocketClient-port").value.trim();
+            var nameSpace = document.getElementById("websocketClient-nameSpace").value.trim();
+            var eventName = document.getElementById("websocketClient-eventName").value.trim();
+
+            var data = document.getElementById("websocketClient-inputWindow").value
+            if (data != undefined && data != null && data != "") {
+                dataJson = JSON.parse(data)
+            }
+            else {
+                dataJson = {
+                    data: 'I\'m connected!'
+                }
+            }
+
+
+            var websocketUrl = "ws://" + ipaddr + ":" + port + nameSpace;
+            alert(websocketUrl)
+            var socket = io.connect(websocketUrl);
+            socket.emit(eventName, dataJson);
+            socket.on(eventName, (data) => {
+                console.log(data)
+                document.getElementById("websocketClient-outputWindow").value = data;
+            });
+        } catch(err) {
+            console.log(err.message)
+            alert(err.message)
+            document.getElementById("websocketClient-outputWindow").value = err.message
+        }
+    }
+</script>
+<style>
+    * {
+        width: 100%;
+        height: 100%;
+        padding: 0px;
+        margin: 0px;
+        text-align: center;
+    }
+
+    div {
+        width: 100%;
+        height: 100%;
+    }
+
+    .websocketClient-input {
+        width: 20%;
+        height: 15%;
+    }
+
+    .websocketClient-button {
+        width: 20%;
+        height: 20%;
+    }
+
+    #websocketClient {
+        width: 100%;
+        height: 100%;
+    }
+
+    #websocketClient-title {
+        height: 5%;
+    }
+
+
+    #websocketClient-header {
+        width: 100%;
+        height: 35%;
+    }
+
+    #websocketClient-sendRequest {
+        margin-top: 2%;
+        height: 10%;
+    }
+
+    #websocketClient-footer {
+        width: 100%;
+        height: 60%;
+    }
+
+    #websocketClient-inputWindow {
+        border-style: solid;
+        width: 49%;
+        height: 100%;
+        text-align: left;
+        font-size: 16px;
+    }
+
+    #websocketClient-outputWindow {
+        border-style: solid;
+        width: 49%;
+        height: 100%;
+        text-align: left;
+        font-size: 16px;
+    }
+
+</style>
+</body>
+</html>
