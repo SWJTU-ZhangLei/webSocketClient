@@ -8,11 +8,11 @@
 <div id="websocketClient">
     <p id="websocketClient-title">websocketClient</p>
     <div id="websocketClient-header">
-        ipaddr:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input class="websocketClient-input" id="websocketClient-ipaddr" value="192.168.121.219">
+        ipaddr:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input class="websocketClient-input" id="websocketClient-ipaddr" value="192.168.121.222">
         <br/>
         port:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input class="websocketClient-input" id="websocketClient-port" value="21135">
         <br/>
-        nameSpace:&nbsp;<input class="websocketClient-input" id="websocketClient-nameSpace" value="/ws/servermanage">
+        nameSpace:&nbsp;<input class="websocketClient-input" id="websocketClient-nameSpace" value="/ws/install">
         <br/>
         eventName:&nbsp;<input class="websocketClient-input" id="websocketClient-eventName" value="init_first_node">
         <br/>
@@ -32,28 +32,44 @@
             var nameSpace = document.getElementById("websocketClient-nameSpace").value.trim();
             var eventName = document.getElementById("websocketClient-eventName").value.trim();
 
-            var data = document.getElementById("websocketClient-inputWindow").value
-            if (data != undefined && data != null && data != "") {
-                dataJson = JSON.parse(data)
+            //获取输入
+            var inputData = document.getElementById("websocketClient-inputWindow").value;
+            if (inputData != undefined && inputData != null && inputData != "") {
+                sendData = JSON.parse(inputData)
             }
             else {
-                dataJson = {
-                    data: 'I\'m connected!'
+                sendData = {
+                    sendData: 'I\'m connected!'
                 }
             }
 
+            var outData = "";
 
             var websocketUrl = "ws://" + ipaddr + ":" + port + nameSpace;
             alert(websocketUrl)
-            var socket = io.connect(websocketUrl);
-            socket.emit(eventName, dataJson);
+
+            var socket = io(websocketUrl, {'reconnect':true});
+
+            socket.on('connect', () => {
+                outData += (new Date().toLocaleTimeString() + ": " + "connect\n")
+                document.getElementById("websocketClient-outputWindow").value = outData;
+            })
+
+            socket.on('connect_timeout', (timeout) => {
+                outData += (new Date().toLocaleTimeString() + ": " + "connect_timeout, timeout=" + timeout + "\n")
+                document.getElementById("websocketClient-outputWindow").value = outData;
+            });
+
             socket.on(eventName, (data) => {
                 console.log(data)
                 document.getElementById("websocketClient-outputWindow").value = data;
             });
+
+            socket.emit(eventName, sendData);
+
         } catch(err) {
-            console.log(err.message)
             alert(err.message)
+            outData = err.me
             document.getElementById("websocketClient-outputWindow").value = err.message
         }
     }
@@ -90,7 +106,6 @@
     #websocketClient-title {
         height: 5%;
     }
-
 
     #websocketClient-header {
         width: 100%;
