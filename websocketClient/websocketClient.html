@@ -46,31 +46,39 @@
             var outData = "";
 
             var websocketUrl = "ws://" + ipaddr + ":" + port + nameSpace;
-            alert(websocketUrl)
+            alert(websocketUrl);
 
-            var socket = io(websocketUrl, {'reconnect':true});
+            var socket = io(websocketUrl, {'reconnect': true});
 
             socket.on('connect', () => {
-                outData += (new Date().toLocaleTimeString() + ": " + "connect\n")
+                outData += (new Date().toLocaleTimeString() + ": " + "connect\n");
                 document.getElementById("websocketClient-outputWindow").value = outData;
-            })
+            });
 
             socket.on('connect_timeout', (timeout) => {
-                outData += (new Date().toLocaleTimeString() + ": " + "connect_timeout, timeout=" + timeout + "\n")
+                outData += (new Date().toLocaleTimeString() + ": " + "connect_timeout, timeout=" + timeout + "\n");
+                document.getElementById("websocketClient-outputWindow").value = outData;
+            });
+
+            socket.on('reconnect', (attemptNumber) => {
+                //
+                outData += (new Date().toLocaleTimeString() + ": " + "reconnect successfully, attemptNumber=" + attemptNumber + "\n");
                 document.getElementById("websocketClient-outputWindow").value = outData;
             });
 
             socket.on(eventName, (data) => {
-                console.log(data)
-                document.getElementById("websocketClient-outputWindow").value = data;
+                outData += (new Date().toLocaleTimeString() + ": " + "response:" + data + "\n");
+                document.getElementById("websocketClient-outputWindow").value = outData;
             });
 
+            outData += (new Date().toLocaleTimeString() + ": " + "request:" + sendData + "\n");
+            document.getElementById("websocketClient-outputWindow").value = outData;
             socket.emit(eventName, sendData);
 
         } catch(err) {
-            alert(err.message)
-            outData = err.me
-            document.getElementById("websocketClient-outputWindow").value = err.message
+            alert(err.message);
+            outData = err.message;
+            document.getElementById("websocketClient-outputWindow").value = err.message;
         }
     }
 </script>
